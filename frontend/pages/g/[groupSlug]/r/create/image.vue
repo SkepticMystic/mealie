@@ -17,20 +17,20 @@
                 align-self="center"
               >
                 <AppButtonUpload
-                  v-if="!uploadedImage"
                   class="ml-auto"
                   url="none"
-                  file-name="image"
+                  file-name="images"
                   accept="image/*"
+                  multiple
                   :text="$t('recipe.upload-image')"
                   :text-btn="false"
                   :post="false"
-                  @uploaded="uploadImage"
+                  @uploaded="uploadImages"
                 />
                 <v-btn
-                  v-if="!!uploadedImage"
+                  v-if="uploadedImages.length > 0"
                   color="error"
-                  @click="clearImage"
+                  @click="clearImages"
                 >
                   <v-icon start>
                     {{ $globals.icons.close }}
@@ -42,7 +42,7 @@
             </v-row>
 
             <div
-              v-if="uploadedImage && uploadedImagePreviewUrl"
+              v-if="uploadedImages.length > 0"
               class="mt-3"
             >
               <v-row>
@@ -59,12 +59,16 @@
               </v-row>
               <v-row style="max-width: 600px;">
                 <v-spacer />
-                <v-col cols="12">
+                <v-col
+                  v-for="(imageUrl, index) in uploadedImagesPreviewUrls"
+                  :key="index"
+                  cols="12"
+                >
                   <ImageCropper
-                    :img="uploadedImagePreviewUrl"
+                    :img="imageUrl"
                     cropper-height="50vh"
                     cropper-width="100%"
-                    @save="updateUploadedImage"
+                    @save="(croppedImage) => updateUploadedImage(index, croppedImage)"
                   />
                 </v-col>
                 <v-spacer />
@@ -72,7 +76,7 @@
             </div>
           </v-container>
         </v-card-text>
-        <v-card-actions v-if="uploadedImage">
+        <v-card-actions v-if="uploadedImages.length > 0">
           <div>
             <p style="width: 250px">
               <BaseButton
@@ -121,55 +125,53 @@ export default defineNuxtComponent({
     const groupSlug = computed(() => route.params.groupSlug || "");
 
     const domUrlForm = ref<VForm | null>(null);
-    const uploadedImage = ref<Blob | File>();
-    const uploadedImageName = ref<string>("");
-    const uploadedImagePreviewUrl = ref<string>();
+    const uploadedImages = ref<(Blob | File)[]>([]);
+    const uploadedImageNames = ref<string[]>([]);
+    const uploadedImagesPreviewUrls = ref<string[]>([]);
     const shouldTranslate = ref(true);
 
-    function uploadImage(fileObject: File) {
-      uploadedImage.value = fileObject;
-      uploadedImageName.value = fileObject.name;
-      uploadedImagePreviewUrl.value = URL.createObjectURL(fileObject);
+    function uploadImages(fileObjects: File[]) {
+      uploadedImages.value = fileObjects;
+      uploadedImageNames.value = fileObjects.map((file) => file.name);
+      uploadedImagesPreviewUrls.value = fileObjects.map((file) => URL.createObjectURL(file));
     }
 
-    function updateUploadedImage(fileObject: Blob) {
-      uploadedImage.value = fileObject;
-      uploadedImagePreviewUrl.value = URL.createObjectURL(fileObject);
-    }
-
-    function clearImage() {
-      uploadedImage.value = undefined;
-      uploadedImageName.value = "";
-      uploadedImagePreviewUrl.value = undefined;
+    function clearImages() {
+      uploadedImages.value = [];
+      uploadedImageNames.value = [];
+      uploadedImagesPreviewUrls.value = [];
     }
 
     async function createRecipe() {
-      if (!uploadedImage.value) {
+      if (uploadedImages.value.length === 0) {
         return;
       }
 
       state.loading = true;
       const translateLanguage = shouldTranslate.value ? i18n.locale : undefined;
-      const { data, error } = await api.recipes.createOneFromImage(uploadedImage.value, uploadedImageName.value, translateLanguage?.value);
+      const { data, error } = await api.recipes.createOneFromImages(uploadedImages.value, translateLanguage?.value);
       if (error || !data) {
         alert.error(i18n.t("events.something-went-wrong"));
         state.loading = false;
-      }
-      else {
+      } else {
         router.push(`/g/${groupSlug.value}/r/${data}`);
-      };
+      }
+    }
+
+    function updateUploadedImage(index: number, croppedImage: Blob) {
+      uploadedImages.value[index] = croppedImage;
     }
 
     return {
       ...toRefs(state),
       domUrlForm,
-      uploadedImage,
-      uploadedImagePreviewUrl,
+      uploadedImages,
+      uploadedImagesPreviewUrls,
       shouldTranslate,
-      uploadImage,
-      updateUploadedImage,
-      clearImage,
+      uploadImages,
+      clearImages,
       createRecipe,
+      updateUploadedImage,
     };
   },
 });
