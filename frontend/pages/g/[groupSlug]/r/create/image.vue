@@ -15,7 +15,7 @@
                   url="none"
                   file-name="images"
                   accept="image/*"
-                  :text="$t('recipe.upload-image')"
+                  :text="uploadedImages.length ? $t('recipe.upload-another-image') : $t('recipe.upload-image')"
                   :text-btn="false"
                   :post="false"
                   @uploaded="uploadImage"
@@ -24,7 +24,7 @@
               <v-spacer />
             </v-row>
 
-            <div v-if="uploadedImages.length > 0" class="mt-3">
+            <div v-if="uploadedImages.length" class="mt-3">
               <v-row>
                 <v-col cols="12" class="pb-0">
                   <v-card-text class="pa-0">
@@ -60,7 +60,7 @@
             </div>
           </v-container>
         </v-card-text>
-        <v-card-actions v-if="uploadedImages.length > 0">
+        <v-card-actions v-if="uploadedImages.length">
           <div>
             <p style="width: 250px">
               <BaseButton rounded block type="submit" :loading="loading" />

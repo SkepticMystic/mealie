@@ -660,7 +660,8 @@
       "no-food": "No Food"
     },
     "reset-servings-count": "Reset Servings Count",
-    "not-linked-ingredients": "Additional Ingredients"
+    "not-linked-ingredients": "Additional Ingredients",
+    "upload-another-image": "Upload another image"
   },
   "recipe-finder": {
     "recipe-finder": "Recipe Finder",
