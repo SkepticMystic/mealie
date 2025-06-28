@@ -15,10 +15,11 @@
                   url="none"
                   file-name="images"
                   accept="image/*"
-                  :text="uploadedImages.length ? $t('recipe.upload-another-image') : $t('recipe.upload-image')"
+                  :text="uploadedImages.length ? $t('recipe.upload-more-images') : $t('recipe.upload-images')"
                   :text-btn="false"
                   :post="false"
-                  @uploaded="uploadImage"
+                  :multiple="true"
+                  @uploaded="uploadImages"
                 />
               </v-col>
               <v-spacer />
@@ -110,10 +111,13 @@ export default defineNuxtComponent({
     const uploadedImagesPreviewUrls = ref<string[]>([]);
     const shouldTranslate = ref(true);
 
-    function uploadImage(fileObject: File) {
-      uploadedImages.value = [...uploadedImages.value, fileObject];
-      uploadedImageNames.value = [...uploadedImageNames.value, fileObject.name];
-      uploadedImagesPreviewUrls.value = [...uploadedImagesPreviewUrls.value, URL.createObjectURL(fileObject)];
+    function uploadImages(files: File[]) {
+      uploadedImages.value = [...uploadedImages.value, ...files];
+      uploadedImageNames.value = [...uploadedImageNames.value, ...files.map(file => file.name)];
+      uploadedImagesPreviewUrls.value = [
+        ...uploadedImagesPreviewUrls.value,
+        ...files.map(file => URL.createObjectURL(file)),
+      ];
     }
 
     function clearImage(index: number) {
@@ -151,7 +155,7 @@ export default defineNuxtComponent({
       uploadedImages,
       uploadedImagesPreviewUrls,
       shouldTranslate,
-      uploadImage,
+      uploadImages,
       clearImage,
       createRecipe,
       updateUploadedImage,
