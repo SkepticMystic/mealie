@@ -599,7 +599,7 @@
     "create-recipe-from-an-image": "Create Recipe from Image(s)",
     "create-recipe-from-an-image-description": "Create a recipe by uploading images of it. Mealie will attempt to extract the text from the image(s) using AI and create a recipe from it.",
     "crop-and-rotate-the-image": "Crop and rotate the image so that only the text is visible, and it's in the correct orientation.",
-    "create-from-image": "Create from Image(s)",
+    "create-from-images": "Create from Images",
     "should-translate-description": "Translate the recipe into my language",
     "please-wait-image-procesing": "Please wait, the image(s) are processing. This may take some time.",
     "bulk-url-import": "Bulk URL Import",
