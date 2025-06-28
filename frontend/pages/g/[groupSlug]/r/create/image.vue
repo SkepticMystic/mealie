@@ -74,7 +74,11 @@
               />
             </p>
             <p v-if="loading" class="mb-0">
-              {{ $t("recipe.please-wait-image-procesing") }}
+              {{
+                uploadedImages.length > 1
+                  ? $t("recipe.please-wait-images-processing")
+                  : $t("recipe.please-wait-image-procesing")
+              }}
             </p>
           </div>
         </v-card-actions>
