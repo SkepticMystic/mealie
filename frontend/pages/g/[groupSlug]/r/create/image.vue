@@ -3,15 +3,23 @@
     <v-form ref="domUrlForm" @submit.prevent="createRecipe">
       <div>
         <v-card-title class="headline">
-          {{ $t('recipe.create-recipe-from-an-image') }}
+          {{ $t("recipe.create-recipe-from-an-image") }}
         </v-card-title>
         <v-card-text>
-          <p>{{ $t('recipe.create-recipe-from-an-image-description') }}</p>
+          <p>{{ $t("recipe.create-recipe-from-an-image-description") }}</p>
           <v-container class="pa-0">
             <v-row>
               <v-col cols="auto" align-self="center">
-                <AppButtonUpload class="ml-auto" url="none" file-name="images" accept="image/*"
-                  :text="$t('recipe.upload-image')" :text-btn="false" :post="false" @uploaded="uploadImage" />
+                <AppButtonUpload
+                  class="ml-auto"
+                  url="none"
+                  file-name="images"
+                  accept="image/*"
+                  :text="$t('recipe.upload-image')"
+                  :text-btn="false"
+                  :post="false"
+                  @uploaded="uploadImage"
+                />
               </v-col>
               <v-spacer />
             </v-row>
@@ -21,24 +29,28 @@
                 <v-col cols="12" class="pb-0">
                   <v-card-text class="pa-0">
                     <p class="mb-0">
-                      {{ $t('recipe.crop-and-rotate-the-image') }}
+                      {{ $t("recipe.crop-and-rotate-the-image") }}
                     </p>
                   </v-card-text>
                 </v-col>
               </v-row>
-              <v-row style="max-width: 600px;">
+              <v-row style="max-width: 600px">
                 <v-spacer />
                 <v-col v-for="(imageUrl, index) in uploadedImagesPreviewUrls" :key="index" cols="12">
                   <v-row>
                     <v-col cols="auto" align-self="center">
-                      <ImageCropper :img="imageUrl" cropper-height="100%" cropper-width="100%"
-                        @save="(croppedImage) => updateUploadedImage(index, croppedImage)" />
+                      <ImageCropper
+                        :img="imageUrl"
+                        cropper-height="100%"
+                        cropper-width="100%"
+                        @save="(croppedImage) => updateUploadedImage(index, croppedImage)"
+                      />
 
                       <v-btn color="error" @click="() => clearImage(index)">
                         <v-icon start>
                           {{ $globals.icons.close }}
                         </v-icon>
-                        {{ $t('recipe.remove-image') }}
+                        {{ $t("recipe.remove-image") }}
                       </v-btn>
                     </v-col>
                   </v-row>
@@ -54,11 +66,15 @@
               <BaseButton rounded block type="submit" :loading="loading" />
             </p>
             <p>
-              <v-checkbox v-model="shouldTranslate" hide-details :label="$t('recipe.should-translate-description')"
-                :disabled="loading" />
+              <v-checkbox
+                v-model="shouldTranslate"
+                hide-details
+                :label="$t('recipe.should-translate-description')"
+                :disabled="loading"
+              />
             </p>
             <p v-if="loading" class="mb-0">
-              {{ $t('recipe.please-wait-image-procesing') }}
+              {{ $t("recipe.please-wait-image-procesing") }}
             </p>
           </div>
         </v-card-actions>
