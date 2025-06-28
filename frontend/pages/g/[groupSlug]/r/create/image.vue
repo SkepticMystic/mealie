@@ -29,15 +29,19 @@
               <v-row style="max-width: 600px;">
                 <v-spacer />
                 <v-col v-for="(imageUrl, index) in uploadedImagesPreviewUrls" :key="index" cols="12">
-                  <ImageCropper :img="imageUrl" cropper-height="50vh" cropper-width="100%"
-                    @save="(croppedImage) => updateUploadedImage(index, croppedImage)" />
+                  <v-row>
+                    <v-col cols="auto" align-self="center">
+                      <ImageCropper :img="imageUrl" cropper-height="100%" cropper-width="100%"
+                        @save="(croppedImage) => updateUploadedImage(index, croppedImage)" />
 
-                  <v-btn color="error" @click="() => clearImage(index)">
-                    <v-icon start>
-                      {{ $globals.icons.close }}
-                    </v-icon>
-                    {{ $t('recipe.remove-image') }}
-                  </v-btn>
+                      <v-btn color="error" @click="() => clearImage(index)">
+                        <v-icon start>
+                          {{ $globals.icons.close }}
+                        </v-icon>
+                        {{ $t('recipe.remove-image') }}
+                      </v-btn>
+                    </v-col>
+                  </v-row>
                 </v-col>
                 <v-spacer />
               </v-row>
