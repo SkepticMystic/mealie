@@ -7,6 +7,7 @@
         </v-card-title>
         <v-card-text>
           <p>{{ $t("recipe.create-recipe-from-an-image-description") }}</p>
+<<<<<<< HEAD
           <v-container class="pa-0">
             <v-row>
               <v-col cols="auto" align-self="center">
@@ -55,14 +56,53 @@
                       </v-btn>
                     </v-col>
                   </v-row>
+=======
+          <v-container class="px-0">
+            <AppButtonUpload
+              class="ml-auto"
+              url="none"
+              file-name="images"
+              accept="image/*"
+              :text="uploadedImages.length ? $t('recipe.upload-more-images') : $t('recipe.upload-images')"
+              :text-btn="false"
+              :post="false"
+              :multiple="true"
+              @uploaded="uploadImages"
+            />
+            <div v-if="uploadedImages.length > 0" class="mt-3">
+              <p class="my-2">
+                {{ $t("recipe.crop-and-rotate-the-image") }}
+              </p>
+              <v-row>
+                <v-col
+                  v-for="(imageUrl, index) in uploadedImagesPreviewUrls"
+                  :key="index"
+                  cols="12"
+                  sm="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <ImageCropper
+                    :img="imageUrl"
+                    cropper-height="100%"
+                    cropper-width="100%"
+                    :submitted="loading"
+                    class="mt-4"
+                    @save="(croppedImage) => updateUploadedImage(index, croppedImage)"
+                    @delete="clearImage(index)"
+                  />
+>>>>>>> b0b3d7e5e59ad9b4539ddbfde126bbf12c89d3d9
                 </v-col>
-                <v-spacer />
               </v-row>
             </div>
           </v-container>
         </v-card-text>
         <v-card-actions v-if="uploadedImages.length">
+<<<<<<< HEAD
           <div>
+=======
+          <div class="w-100 d-flex flex-column align-center">
+>>>>>>> b0b3d7e5e59ad9b4539ddbfde126bbf12c89d3d9
             <p style="width: 250px">
               <BaseButton rounded block type="submit" :loading="loading" />
             </p>
@@ -147,6 +187,10 @@ export default defineNuxtComponent({
 
     function updateUploadedImage(index: number, croppedImage: Blob) {
       uploadedImages.value[index] = croppedImage;
+<<<<<<< HEAD
+=======
+      uploadedImagesPreviewUrls.value[index] = URL.createObjectURL(croppedImage);
+>>>>>>> b0b3d7e5e59ad9b4539ddbfde126bbf12c89d3d9
     }
 
     return {
