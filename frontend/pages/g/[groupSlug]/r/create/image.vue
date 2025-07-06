@@ -32,15 +32,30 @@
                   lg="4"
                   xl="3"
                 >
-                  <ImageCropper
-                    :img="imageUrl"
-                    cropper-height="100%"
-                    cropper-width="100%"
-                    :submitted="loading"
-                    class="mt-4"
-                    @save="(croppedImage) => updateUploadedImage(index, croppedImage)"
-                    @delete="clearImage(index)"
-                  />
+                  <v-col>
+                    <ImageCropper
+                      :img="imageUrl"
+                      cropper-height="100%"
+                      cropper-width="100%"
+                      :submitted="loading"
+                      class="mt-4 mb-2"
+                      @save="(croppedImage) => updateUploadedImage(index, croppedImage)"
+                      @delete="clearImage(index)"
+                    />
+
+                    <v-btn
+                      v-if="uploadedImages.length > 1"
+                      :disabled="loading || coverImageIndex === index"
+                      color="primary"
+                      @click="() => (coverImageIndex = index)"
+                    >
+                      <v-icon start>
+                        {{ coverImageIndex === index ? $globals.icons.check : $globals.icons.fileImage }}
+                      </v-icon>
+
+                      {{ coverImageIndex === index ? $t("recipe.cover-image") : $t("recipe.set-as-cover-image") }}
+                    </v-btn>
+                  </v-col>
                 </v-col>
               </v-row>
             </div>
@@ -95,6 +110,7 @@ export default defineNuxtComponent({
     const uploadedImageNames = ref<string[]>([]);
     const uploadedImagesPreviewUrls = ref<string[]>([]);
     const shouldTranslate = ref(true);
+    const coverImageIndex = ref<number | null>(null);
 
     function uploadImages(files: File[]) {
       uploadedImages.value = [...uploadedImages.value, ...files];
@@ -103,14 +119,23 @@ export default defineNuxtComponent({
         ...uploadedImagesPreviewUrls.value,
         ...files.map(file => URL.createObjectURL(file)),
       ];
+
+      if (files.length && coverImageIndex.value === null) {
+        coverImageIndex.value = 0;
+      }
     }
 
     function clearImage(index: number) {
+      // Revoke _before_ splicing
       URL.revokeObjectURL(uploadedImagesPreviewUrls.value[index]);
 
-      uploadedImages.value = uploadedImages.value.filter((_, i) => i !== index);
-      uploadedImageNames.value = uploadedImageNames.value.filter((_, i) => i !== index);
-      uploadedImagesPreviewUrls.value = uploadedImagesPreviewUrls.value.filter((_, i) => i !== index);
+      uploadedImages.value.splice(index, 1);
+      uploadedImageNames.value.splice(index, 1);
+      uploadedImagesPreviewUrls.value.splice(index, 1);
+
+      if (coverImageIndex.value === index) {
+        coverImageIndex.value = null;
+      }
     }
 
     async function createRecipe() {
@@ -119,6 +144,15 @@ export default defineNuxtComponent({
       }
 
       state.loading = true;
+
+      // Put the intended cover image at the start of the array
+      // The backend currently sets the first image as the cover image
+      if (coverImageIndex.value !== null && coverImageIndex.value !== 0) {
+        swapImages(0, coverImageIndex.value);
+
+        coverImageIndex.value = 0;
+      }
+
       const translateLanguage = shouldTranslate.value ? i18n.locale : undefined;
       const { data, error } = await api.recipes.createOneFromImages(uploadedImages.value, translateLanguage?.value);
       if (error || !data) {
@@ -135,12 +169,29 @@ export default defineNuxtComponent({
       uploadedImagesPreviewUrls.value[index] = URL.createObjectURL(croppedImage);
     }
 
+    function swapItem(array: any[], i: number, j: number) {
+      if (i < 0 || j < 0 || i >= array.length || j >= array.length) {
+        return;
+      }
+
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+
+    function swapImages(i: number, j: number) {
+      swapItem(uploadedImages.value, i, j);
+      swapItem(uploadedImageNames.value, i, j);
+      swapItem(uploadedImagesPreviewUrls.value, i, j);
+    }
+
     return {
       ...toRefs(state),
       domUrlForm,
       uploadedImages,
       uploadedImagesPreviewUrls,
       shouldTranslate,
+      coverImageIndex,
       uploadImages,
       clearImage,
       createRecipe,
