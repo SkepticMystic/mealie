@@ -64,6 +64,12 @@ class RecipeService(RecipeServiceBase):
             raise exceptions.NoEntryFound("Recipe not found.")
         return recipe
 
+    def can_delete(self, recipe: Recipe) -> bool:
+        if self.user.admin:
+            return True
+        else:
+            return self.can_update(recipe)
+
     def can_update(self, recipe: Recipe) -> bool:
         if recipe.settings is None:
             raise exceptions.UnexpectedNone("Recipe Settings is None")
@@ -167,7 +173,6 @@ class RecipeService(RecipeServiceBase):
                     show_assets=self.household.preferences.recipe_show_assets,
                     landscape_view=self.household.preferences.recipe_landscape_view,
                     disable_comments=self.household.preferences.recipe_disable_comments,
-                    disable_amount=self.household.preferences.recipe_disable_amount,
                 )
             else:
                 data.settings = RecipeSettings()
@@ -404,8 +409,7 @@ class RecipeService(RecipeServiceBase):
         return new_data
 
     def patch_one(self, slug_or_id: str | UUID, patch_data: Recipe) -> Recipe:
-        recipe: Recipe | None = self._pre_update_check(slug_or_id, patch_data)
-        recipe = self.get_one(slug_or_id)
+        recipe: Recipe = self._pre_update_check(slug_or_id, patch_data)
 
         new_data = self.group_recipes.patch(recipe.slug, patch_data.model_dump(exclude_unset=True))
 
@@ -424,7 +428,7 @@ class RecipeService(RecipeServiceBase):
     def delete_one(self, slug_or_id: str | UUID) -> Recipe:
         recipe = self.get_one(slug_or_id)
 
-        if not self.can_update(recipe):
+        if not self.can_delete(recipe):
             raise exceptions.PermissionDenied("You do not have permission to delete this recipe.")
 
         data = self.group_recipes.delete(recipe.id, "id")
