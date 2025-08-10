@@ -45,15 +45,15 @@
 
                     <v-btn
                       v-if="uploadedImages.length > 1"
-                      :disabled="loading || coverImageIndex === index"
+                      :disabled="loading || index === 0"
                       color="primary"
-                      @click="() => (coverImageIndex = index)"
+                      @click="() => setCoverImage(index)"
                     >
                       <v-icon start>
-                        {{ coverImageIndex === index ? $globals.icons.check : $globals.icons.fileImage }}
+                        {{ index === 0 ? $globals.icons.check : $globals.icons.fileImage }}
                       </v-icon>
 
-                      {{ coverImageIndex === index ? $t("recipe.cover-image") : $t("recipe.set-as-cover-image") }}
+                      {{ index === 0 ? $t("recipe.cover-image") : $t("recipe.set-as-cover-image") }}
                     </v-btn>
                   </v-col>
                 </v-col>
@@ -110,7 +110,6 @@ export default defineNuxtComponent({
     const uploadedImageNames = ref<string[]>([]);
     const uploadedImagesPreviewUrls = ref<string[]>([]);
     const shouldTranslate = ref(true);
-    const coverImageIndex = ref<number | null>(null);
 
     function uploadImages(files: File[]) {
       uploadedImages.value = [...uploadedImages.value, ...files];
@@ -119,10 +118,6 @@ export default defineNuxtComponent({
         ...uploadedImagesPreviewUrls.value,
         ...files.map(file => URL.createObjectURL(file)),
       ];
-
-      if (files.length && coverImageIndex.value === null) {
-        coverImageIndex.value = 0;
-      }
     }
 
     function clearImage(index: number) {
@@ -132,10 +127,6 @@ export default defineNuxtComponent({
       uploadedImages.value.splice(index, 1);
       uploadedImageNames.value.splice(index, 1);
       uploadedImagesPreviewUrls.value.splice(index, 1);
-
-      if (coverImageIndex.value === index) {
-        coverImageIndex.value = null;
-      }
     }
 
     async function createRecipe() {
@@ -144,14 +135,6 @@ export default defineNuxtComponent({
       }
 
       state.loading = true;
-
-      // Put the intended cover image at the start of the array
-      // The backend currently sets the first image as the cover image
-      if (coverImageIndex.value !== null && coverImageIndex.value !== 0) {
-        swapImages(0, coverImageIndex.value);
-
-        coverImageIndex.value = 0;
-      }
 
       const translateLanguage = shouldTranslate.value ? i18n.locale : undefined;
       const { data, error } = await api.recipes.createOneFromImages(uploadedImages.value, translateLanguage?.value);
@@ -185,17 +168,27 @@ export default defineNuxtComponent({
       swapItem(uploadedImagesPreviewUrls.value, i, j);
     }
 
+    // Put the intended cover image at the start of the array
+    // The backend currently sets the first image as the cover image
+    function setCoverImage(index: number) {
+      if (index < 0 || index >= uploadedImages.value.length || index === 0) {
+        return;
+      }
+
+      swapImages(0, index);
+    }
+
     return {
       ...toRefs(state),
       domUrlForm,
       uploadedImages,
       uploadedImagesPreviewUrls,
       shouldTranslate,
-      coverImageIndex,
       uploadImages,
       clearImage,
       createRecipe,
       updateUploadedImage,
+      setCoverImage,
     };
   },
 });
